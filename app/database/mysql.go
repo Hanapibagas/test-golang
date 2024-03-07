@@ -2,7 +2,7 @@ package database
 
 import (
 	"Test-Golang/app/configs"
-	"Test-Golang/features/user/data"
+	"Test-Golang/features/pesanan/data"
 	"fmt"
 
 	"gorm.io/driver/mysql"
@@ -24,4 +24,6 @@ func InitDBMysql(cfg *configs.AppConfig) *gorm.DB {
 
 func InitMigrate(db *gorm.DB) {
 	db.AutoMigrate(&data.User{})
+	db.AutoMigrate(&data.Product{})
+	db.AutoMigrate(&data.Order{})
 }

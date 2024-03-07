@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"Test-Golang/app/middlewares"
 	"Test-Golang/features/user"
 	"Test-Golang/utils/responses"
 	"net/http"
@@ -20,6 +21,7 @@ func NewUser(service user.UserServiceInterface) *UserHandler {
 
 func (handler *UserHandler) RegisterUser(c echo.Context) error {
 	newUser := UserRequestRegister{}
+
 	errBind := c.Bind(&newUser)
 	if errBind != nil {
 		return c.JSON(http.StatusBadRequest, responses.WebResponse("error bind data. data not valid."+errBind.Error(), nil))
@@ -44,6 +46,7 @@ func (handler *UserHandler) RegisterUser(c echo.Context) error {
 
 func (handler *UserHandler) LoginUser(c echo.Context) error {
 	var reqData = UserRequestLogin{}
+
 	errBind := c.Bind(&reqData)
 	if errBind != nil {
 		return c.JSON(http.StatusBadRequest, responses.WebResponse("error bind data. data not valid."+errBind.Error(), nil))
@@ -54,7 +57,7 @@ func (handler *UserHandler) LoginUser(c echo.Context) error {
 		return c.JSON(http.StatusForbidden, responses.WebResponse("Email atau password tidak boleh kosong "+err.Error(), nil))
 	}
 
-	responData := map[string]any{
+	responseData := map[string]any{
 		"id":    result.ID,
 		"name":  result.Name,
 		"email": result.Email,
@@ -62,5 +65,39 @@ func (handler *UserHandler) LoginUser(c echo.Context) error {
 		"toke":  token,
 	}
 
-	return c.JSON(http.StatusOK, responses.WebResponse("insert success", responData))
+	return c.JSON(http.StatusOK, responses.WebResponse("insert success", responseData))
+}
+
+func (handler *UserHandler) UpdatePassword(c echo.Context) error {
+	userId := middlewares.ExtractTokenUserId(c)
+
+	updatePassword := UpdatePasswordRequest{}
+	errBind := c.Bind(&updatePassword)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, responses.WebResponse("error bind data. data not valid"+errBind.Error(), nil))
+	}
+
+	userCore := RequestToUpdatePassword(updatePassword)
+
+	errUpdate := handler.userService.UpdatePassword(uint(userId), userCore)
+	if errUpdate != nil {
+		return c.JSON(http.StatusInternalServerError, responses.WebResponse("error editing data. "+errUpdate.Error(), nil))
+	}
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message": "Successful Operation",
+	})
+}
+
+func (handler *UserHandler) GetById(c echo.Context) error {
+	userId := middlewares.ExtractTokenUserId(c)
+
+	result, errGetByID := handler.userService.GetById(uint(userId))
+	if errGetByID != nil {
+		return c.JSON(http.StatusBadRequest, responses.WebResponse("error bind data. data not valid"+errGetByID.Error(), nil))
+	}
+
+	userResult := CoreResponUserById(*result)
+
+	return c.JSON(http.StatusOK, responses.WebResponse("insert success", userResult))
 }

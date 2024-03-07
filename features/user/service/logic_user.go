@@ -32,6 +32,7 @@ func (service *userService) Login(email string, password string) (data *user.Use
 	if err != nil {
 		return nil, "", errors.New("Email atau password salah")
 	}
+
 	isValid := service.hashService.CheckPasswordHash(data.Password, password)
 	if !isValid {
 		return nil, "", errors.New("password tidak sesuai.")
@@ -41,6 +42,7 @@ func (service *userService) Login(email string, password string) (data *user.Use
 	if errJwt != nil {
 		return nil, "", errJwt
 	}
+
 	return data, token, err
 }
 
@@ -60,4 +62,27 @@ func (service *userService) Register(input user.UserCore) (data *user.UserCore, 
 
 	data, generatedToken, err := service.userData.Register(input)
 	return data, generatedToken, err
+}
+
+func (service *userService) GetById(id uint) (*user.UserCore, error) {
+	result, err := service.userData.GetById(id)
+	return result, err
+}
+
+func (service *userService) UpdatePassword(id uint, input user.AuthCorePassword) error {
+	errValidate := service.validate.Struct(input)
+	if errValidate != nil {
+		return errValidate
+	}
+
+	if input.Password != "" {
+		hashedPass, errHash := service.hashService.HashPassword(input.Password)
+		if errHash != nil {
+			return errors.New("Error hash password.")
+		}
+		input.Password = hashedPass
+	}
+
+	err := service.userData.UpdatePassword(id, input)
+	return err
 }

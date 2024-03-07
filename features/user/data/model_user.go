@@ -24,7 +24,7 @@ func (u User) ModelToCoreLogin() user.UserCore {
 	}
 }
 
-func (u User) ModelToCore() user.UserCore {
+func (u User) ModelToCoreRegister() user.UserCore {
 	return user.UserCore{
 		ID:       u.ID,
 		Name:     u.Name,
