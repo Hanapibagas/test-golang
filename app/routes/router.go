@@ -2,6 +2,9 @@ package routes
 
 import (
 	"Test-Golang/app/middlewares"
+	_pesananData "Test-Golang/features/pesanan/data"
+	_pesananHandler "Test-Golang/features/pesanan/handler"
+	_pesannanService "Test-Golang/features/pesanan/service"
 	_productData "Test-Golang/features/produk/data"
 	_producthHandler "Test-Golang/features/produk/handler"
 	_productService "Test-Golang/features/produk/service"
@@ -27,6 +30,11 @@ func InitRouter(db *gorm.DB, e *echo.Echo) {
 	productService := _productService.NewProduk(productData)
 	productHandler := _producthHandler.NewProduct(productService)
 
+	// pesnan
+	pesananData := _pesananData.NewOrder(db)
+	pesananService := _pesannanService.NewOrder(pesananData)
+	pesnanHandler := _pesananHandler.NewOrder(pesananService)
+
 	// login
 	e.POST("/register", authHandler.RegisterUser)
 	e.POST("/login", authHandler.LoginUser)
@@ -38,4 +46,7 @@ func InitRouter(db *gorm.DB, e *echo.Echo) {
 	e.PUT("/product/:product_id", productHandler.Update, middlewares.JWTMiddleware())
 	e.GET("/product", productHandler.GetAll, middlewares.JWTMiddleware())
 	e.DELETE("/product/:product_id", productHandler.Delete, middlewares.JWTMiddleware())
+
+	e.GET("/order", pesnanHandler.GetAll, middlewares.JWTMiddleware())
+	e.GET("/order", pesnanHandler.SearchOrderByQuery, middlewares.JWTMiddleware())
 }
