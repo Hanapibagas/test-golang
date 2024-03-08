@@ -1,10 +1,10 @@
 package user
 
 type UserCore struct {
-	ID       uint `json:"id"`
-	Name     string
+	ID       uint   `json:"id"`
+	Name     string `validate:"required"`
 	Email    string `gorm:"default:null;unique"`
-	Password string
+	Password string `validate:"min=6"`
 	Role     string
 }
 
